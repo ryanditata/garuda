@@ -351,19 +351,20 @@ class AdminController extends Controller
         ]);
     }
 
-    public function exportApplicant()
+    public function exportApplicant(Request $request)
     {
-        return Excel::download(new ApplyExport, 'applicants.xlsx');
+        $department = $request->input('department');
+
+        $filename = 'applicants_' . ($department ? str_replace(' ', '_', $department) : 'all') . '.xlsx';
+        return Excel::download(new ApplyExport($department), $filename);
     }
 
     public function exportSpecificAllData(Request $request)
     {
-        $request->validate([
-            'year' => 'required|numeric'
-        ]);
-        $year = $request->input('year');
+        $department = $request->input('department');
 
-        return Excel::download(new ApplywithFilterExport($year), 'applicants_' . $year . '.xlsx');
+        $filename = 'applicants_' . ($department ? str_replace(' ', '_', $department) : 'all') . '.xlsx';
+        return Excel::download(new ApplywithFilterExport($department), $filename);
     }
 
     public function makeZip($id)
@@ -426,7 +427,8 @@ class AdminController extends Controller
             'admin.table',
             [
                 'applicants' => $applicant,
-                'year' => $year
+                'year' => $year,
+                'departments' => $this->departments
             ]
         );
     }
@@ -865,7 +867,8 @@ class AdminController extends Controller
 
         $applicantWithPage = $applicant->paginate(30)->withQueryString();
         return view('admin.all_data', [
-            'applicants' => $applicantWithPage
+            'applicants' => $applicantWithPage,
+            'departments' => $this->departments
         ]);
     }
 

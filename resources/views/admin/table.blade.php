@@ -44,7 +44,7 @@
             @endif
             {{-- Button Export Excel --}}
             <div class="flex justify-end mb-3">
-                <a href="{{ route('admin.exportApplicant') }}"
+                <button type="button" id="export-button-current"
                     class="inline-flex items-center p-3 bg-green-500 hover:bg-green-600 text-white text-sm font-medium rounded-md transition ease-in-out duration-200">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-box-arrow-up h-5 w-5"
                         viewBox="0 0 16 16">
@@ -54,7 +54,7 @@
                             d="M7.646.146a.5.5 0 0 1 .708 0l3 3a.5.5 0 0 1-.708.708L8.5 1.707V10.5a.5.5 0 0 1-1 0V1.707L5.354 3.854a.5.5 0 1 1-.708-.708z" />
                     </svg>
                     <span class="ml-2">Export Excel</span>
-                </a>
+                </button>
             </div>
             <div class="flex justify-between items-center">
                 <form action="{{ route('admin.table') }}" class="flex items-center my-3">
@@ -189,17 +189,28 @@
 
     {{-- Modals --}}
     @include('admin.partials.add-comment')
+    @include('admin.partials.export-modal-current')
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             const modal = document.getElementById('add-comment-form');
 
             // Disable Enter key to prevent form submission in modal
-            modal.addEventListener('keydown', function(event) {
-                if (event.key === 'Enter') {
-                    event.preventDefault(); // Prevent form submission on Enter key
-                }
-            });
+            if(modal) {
+                modal.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault(); // Prevent form submission on Enter key
+                    }
+                });
+            }
+
+            // Export Button Click
+            const exportBtn = document.getElementById('export-button-current');
+            if (exportBtn) {
+                exportBtn.addEventListener('click', function() {
+                    document.getElementById('exportModalCurrent').classList.remove('hidden');
+                });
+            }
         });
 
         function confirmDelete(event) {

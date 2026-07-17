@@ -6,11 +6,16 @@
         <div class="flex justify-center mb-4">
             <h3 class="text-lg font-bold">Export Data</h3>
         </div>
-        <p class="text-gray-600 mb-4">Exporting data will create a downloadable file containing all the data from the selected year. Are you sure you want to proceed?</p>
-        <form action="{{ route('admin.exportSpecificAllData', ) }}" method="GET">
+        <p class="text-gray-600 mb-4">Exporting data will create a downloadable Excel file. You can choose a specific department to export or export all.</p>
+        <form action="{{ route('admin.exportSpecificAllData') }}" method="GET">
             @csrf
-            <label for="export-year" class="block mb-2">Enter Year:</label>
-            <input type="number" id="export-year" name="year" class="border border-gray-300 p-2 rounded-md w-full" required>
+            <label for="export-department" class="block mb-2 font-bold">Select Department:</label>
+            <select id="export-department" name="department" class="border border-gray-300 p-2 rounded-md w-full mb-4">
+                <option value="">All</option>
+                @foreach ($departments as $dept)
+                    <option value="{{ $dept }}">{{ $dept }}</option>
+                @endforeach
+            </select>
             <div class="flex justify-end mt-4">
                 <button type="button" onclick="closeModal('exportModal')" class="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded mr-2">
                     Cancel
