@@ -5,12 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>@yield('title')</title>
     <link rel="icon" href="{{ asset('assets/logo-udinus.png') }}" type="image/x-icon">
-    {{-- <script type="module" src="{{ asset('build/assets/app-C1-XIpUa.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('build/assets/app-7faw23md.css') }}"> --}}
-    {{-- @yield('ex-css') --}}
-    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.16.105/pdf.min.js"></script>
-    <script src="https://unpkg.com/alpinejs@3.4.2/dist/cdn.min.js" defer></script> --}}
-    @vite('resources/css/app.css')
+    <!-- Memanggil CSS dan JS sekaligus melalui Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-100">
     <!-- component -->

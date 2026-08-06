@@ -7,9 +7,8 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Login</title>
     <link rel="icon" href="{{ asset('assets/logo-udinus.png') }}" type="image/x-icon">
-    {{-- <script type="module" src="{{ asset('build/assets/app-C1-XIpUa.js') }}"></script>
-    <link rel="stylesheet" href="{{ asset('build/assets/app-7faw23md.css') }}"> --}}
-    @vite('resources/css/app.css')
+    <!-- Memanggil CSS dan JS sekaligus melalui Vite -->
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 
 <body>
