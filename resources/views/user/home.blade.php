@@ -267,35 +267,24 @@
                                         NOT SELECTED
                                     </span>
                                 </div>
-
-                                <div class="text-rose-50 text-sm sm:text-base leading-relaxed max-w-4xl">
-                                    <p>
-                                        Thank you for your interest in the <strong class="text-white font-semibold"><em>Garuda Scholarship 2026</em></strong> at <strong class="text-white font-semibold"><em>Universitas Dian Nuswantoro (UDINUS)</em></strong>.
-                                    </p>
-                                </div>
                             </div>
 
                             {{-- Announcement Body --}}
                             <div class="p-6 md:p-8 bg-rose-50/30">
                                 <div class="space-y-4 text-xs sm:text-sm text-gray-700 leading-relaxed mb-6">
                                     <p>
+                                        Thank you for your interest in the <strong class="font-semibold"><em>Garuda Scholarship 2026</em></strong> at <strong class="font-semibold"><em>Universitas Dian Nuswantoro (UDINUS)</em></strong>.
+                                    </p>
+
+                                    <p>
                                         We truly appreciate the effort you put into your application. After a thorough and competitive review process, we regret to inform you that <strong class="text-rose-900 font-bold"><em>you have not been selected</em></strong> as a recipient for this year’s intake. Please understand that this decision does not reflect your potential or capabilities. The selection process was highly competitive, and we received many outstanding applications from across the world.
                                     </p>
 
-                                    <div class="bg-white p-4 sm:p-5 rounded-xl border border-rose-200 shadow-sm">
-                                        <div class="flex items-start gap-3">
-                                            <div class="p-2 bg-rose-100 text-rose-700 rounded-lg flex-shrink-0 mt-0.5">
-                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                                </svg>
-                                            </div>
-                                            <p class="text-xs sm:text-sm text-gray-700 leading-relaxed">
-                                                We believe in your potential and would be honored to receive your application in the next intake period. Stay connected with UDINUS through our official website and social media for updates on upcoming programs and application periods.
-                                            </p>
-                                        </div>
-                                    </div>
+                                    <p>
+                                        We believe in your potential and would be honored to receive your application in the next intake period. Stay connected with UDINUS through our official website and social media for updates on upcoming programs and application periods.
+                                    </p>
 
-                                    <p class="font-medium text-gray-800 pt-1">
+                                    <p>
                                         We wish you every success in your academic journey ahead.
                                     </p>
                                 </div>
