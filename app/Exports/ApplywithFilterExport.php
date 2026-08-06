@@ -53,6 +53,7 @@ class ApplywithFilterExport implements FromQuery, WithHeadings, WithMapping, Wit
             'Link First Letter of Recommendation',
             'Link Second Letter of Recommendation',
             'Link Commitment Letter',
+            'Link Signed Acceptance Letter',
         ];
     }
 
@@ -73,6 +74,7 @@ class ApplywithFilterExport implements FromQuery, WithHeadings, WithMapping, Wit
             $apply->document->first_letter_of_recommendation ? asset('storage/' . $apply->document->first_letter_of_recommendation) : '',
             $apply->document->second_letter_of_recommendation ? asset('storage/' . $apply->document->second_letter_of_recommendation) : '',
             $apply->document->commitment_letter ? asset('storage/' . $apply->document->commitment_letter) : '',
+            $apply->document->signed_acceptance_letter ? asset('storage/' . $apply->document->signed_acceptance_letter) : '',
         ];
     }
 

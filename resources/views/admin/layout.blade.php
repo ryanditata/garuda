@@ -44,6 +44,11 @@
                     </div>
                 </div>
                 <a class="block px-4 py-2 mt-2 text-sm font-semibold text-white bg-transparent rounded-lg hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline {{ request()->is('table/user-status') ? 'bg-yellow-500' : '' }}" href="{{ route('admin.status') }}">Update Status</a>
+                <a class="block px-4 py-2 mt-2 text-sm font-semibold text-white bg-transparent rounded-lg hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline {{ request()->is('table/accepted*') ? 'bg-yellow-500' : '' }}" href="{{ route('admin.acceptedApplicants') }}">
+                    <div class="flex items-center gap-2">
+                        <span>Peserta Lolos</span>
+                    </div>
+                </a>
                 <a class="block px-4 py-2 mt-2 text-sm font-semibold text-white bg-transparent rounded-lg hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline {{ request()->is('admin/blog*') ? 'bg-yellow-500' : '' }}" href="{{ route('admin.blog') }}">Blog</a>
                 <a class="block px-4 py-2 mt-2 text-sm font-semibold text-white bg-transparent rounded-lg hover:text-gray-900 focus:text-gray-900 hover:bg-gray-200 focus:bg-gray-200 focus:outline-none focus:shadow-outline {{ request()->is('admin/user*') ? 'bg-yellow-500' : '' }}" href="{{ route('admin.user') }}">User</a>
                 <form action="{{ route('admin.logout') }}" method="POST">
@@ -53,7 +58,7 @@
             </nav>
         </div>
         <!-- Main Content -->
-        <div class="flex flex-col w-full">
+        <div class="flex flex-col w-full min-w-0 flex-1 overflow-x-hidden">
             <nav class="bg-white shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] hidden md:flex">
                 <div class="container mx-auto px-6 py-3">
                     <div class="flex items-center justify-between">

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AnnouncementSetting;
 use App\Models\Apply;
 use App\Models\Document;
 use App\Models\Queue;
@@ -307,9 +308,11 @@ class UserController extends Controller
     {
         $user = Auth::user();
         $apply = Apply::where('user_id', $user->id)->with('user', 'status', 'document')->first();
-        // return dd($apply);
+        $announcementSetting = AnnouncementSetting::current();
+
         return view('user.home', [
-            'apply_data' => $apply
+            'apply_data' => $apply,
+            'announcement_setting' => $announcementSetting
         ]);
     }
 
@@ -538,6 +541,69 @@ class UserController extends Controller
             Log::error('Error submitting application: ' . $th->getMessage());
             Alert::toast('Failed to update profile.', 'error');
             return redirect('/profile/edit');
+        }
+    }
+
+    public function downloadAcceptanceTemplate()
+    {
+        $user = Auth::user();
+        $apply = Apply::where('user_id', $user->id)->first();
+        $setting = AnnouncementSetting::current();
+
+        if (!$setting->is_published || !$apply || $apply->status_id != 5) {
+            Alert::toast('You are not authorized to download this document.', 'error');
+            return redirect()->route('user.index');
+        }
+
+        if (!$setting->acceptance_template_path || !Storage::exists('public/' . $setting->acceptance_template_path)) {
+            Alert::toast('Acceptance letter template is not available yet. Please contact the administrator.', 'warning');
+            return redirect()->route('user.index');
+        }
+
+        $filePath = Storage::path('public/' . $setting->acceptance_template_path);
+        return response()->download($filePath, $setting->template_filename ?? 'Acceptance_Letter_Template.' . pathinfo($filePath, PATHINFO_EXTENSION));
+    }
+
+    public function uploadSignedAcceptance(Request $request)
+    {
+        $user = Auth::user();
+        $apply = Apply::where('user_id', $user->id)->with('document')->first();
+        $setting = AnnouncementSetting::current();
+
+        if (!$setting->is_published || !$apply || $apply->status_id != 5) {
+            Alert::toast('Unauthorized action.', 'error');
+            return redirect()->route('user.index');
+        }
+
+        $request->validate([
+            'signed_acceptance_letter' => 'required|file|mimes:pdf|max:2048',
+        ]);
+
+        $document = $apply->document;
+        if (!$document) {
+            Alert::toast('Applicant document record not found.', 'error');
+            return redirect()->route('user.index');
+        }
+
+        DB::beginTransaction();
+        try {
+            if ($document->signed_acceptance_letter && Storage::exists('public/' . $document->signed_acceptance_letter)) {
+                Storage::delete('public/' . $document->signed_acceptance_letter);
+            }
+
+            $path = $request->file('signed_acceptance_letter')->store('public/signed_acceptance');
+            $document->signed_acceptance_letter = str_replace('public/', '', $path);
+            $document->save();
+
+            DB::commit();
+
+            Alert::toast('Signed acceptance letter uploaded successfully.', 'success');
+            return redirect()->route('user.index');
+        } catch (\Throwable $th) {
+            DB::rollBack();
+            Log::error('Error uploading signed acceptance letter: ' . $th->getMessage());
+            Alert::toast('Failed to upload signed acceptance letter.', 'error');
+            return redirect()->route('user.index');
         }
     }
 }

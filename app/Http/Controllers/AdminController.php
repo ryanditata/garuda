@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\AcceptedApplyExport;
 use App\Exports\ApplyExport;
 use App\Exports\ApplywithFilterExport;
 use App\Models\Admin;
+use App\Models\AnnouncementSetting;
 use App\Models\Apply;
 use App\Models\Blog;
 use App\Models\Document;
@@ -370,13 +372,17 @@ class AdminController extends Controller
     public function makeZip($id)
     {
         $applicant = Apply::where('id', $id)->with('document')->first();
+        if (!$applicant || !$applicant->document) {
+            return redirect()->back()->with('error', 'Applicant document not found');
+        }
+
         $document = $applicant->document;
 
         $zip = new \ZipArchive();
-        $zipFileName = 'documents_' . $document->first_name . '_' . $document->family_name . '.zip';
+        $zipFileName = 'documents_' . str_replace(' ', '_', $document->first_name) . '_' . str_replace(' ', '_', $document->family_name) . '.zip';
         $zipFilePath = storage_path('app/public/' . $zipFileName);
 
-        if ($zip->open($zipFilePath, \ZipArchive::CREATE) === TRUE) {
+        if ($zip->open($zipFilePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === TRUE) {
             $files = [
                 'profile_picture' => $document->profile_picture,
                 'passport' => $document->passport,
@@ -388,25 +394,28 @@ class AdminController extends Controller
                 'medical_checkup' => $document->medical_checkup,
                 'first_letter_of_recommendation' => $document->first_letter_of_recommendation,
                 'second_letter_of_recommendation' => $document->second_letter_of_recommendation,
-                'commitment_letter' => $document->commitment_letter
+                'commitment_letter' => $document->commitment_letter,
+                'signed_acceptance_letter' => $document->signed_acceptance_letter,
             ];
 
             foreach ($files as $key => $file) {
                 if ($file) {
                     $filePath = Storage::path('public/' . $file);
 
-                    if (!file_exists($filePath)) {
-                        return redirect()->back()->with('error', 'File not found');
+                    if (file_exists($filePath)) {
+                        $zip->addFile($filePath, $key . '.' . pathinfo($file, PATHINFO_EXTENSION));
                     }
-
-                    $zip->addFile($filePath, $key . '.' . pathinfo($file, PATHINFO_EXTENSION));
                 }
             }
 
             $zip->close();
         }
 
-        return response()->download($zipFilePath)->deleteFileAfterSend(true);
+        if (file_exists($zipFilePath)) {
+            return response()->download($zipFilePath)->deleteFileAfterSend(true);
+        }
+
+        return redirect()->back()->with('error', 'Failed to generate ZIP archive.');
     }
 
     public function dashboard(Request $request)
@@ -626,12 +635,14 @@ class AdminController extends Controller
             ->paginate($perPage)
             ->appends($request->query());
         $status = DB::table('statuses')->get();
+        $announcementSetting = AnnouncementSetting::current();
 
         return view(
             'admin.status',
             [
                 'applicants' => $applicant,
-                'statuses' => $status
+                'statuses' => $status,
+                'announcementSetting' => $announcementSetting
             ]
         );
     }
@@ -673,6 +684,149 @@ class AdminController extends Controller
         return response()->json([
             'message' => 'Comment updated successfully',
         ]);
+    }
+
+    // Announcement & Acceptance Template Control
+    public function toggleAnnouncementPublish(Request $request)
+    {
+        $setting = AnnouncementSetting::current();
+        $setting->is_published = !$setting->is_published;
+        if ($setting->is_published) {
+            $setting->published_at = now();
+            $msg = 'Pengumuman kelulusan berhasil DIPUBLIKASIKAN ke seluruh peserta!';
+        } else {
+            $msg = 'Pengumuman kelulusan berhasil DITARIK / DIJADIKAN DRAFT.';
+        }
+        $setting->save();
+
+        FacadesAlert::toast($msg, 'success');
+        return redirect()->route('admin.status')->with('success', $msg);
+    }
+
+    public function uploadAcceptanceTemplate(Request $request)
+    {
+        $request->validate([
+            'template_file' => 'required|file|mimes:pdf,doc,docx|max:5120',
+        ]);
+
+        $setting = AnnouncementSetting::current();
+
+        if ($request->hasFile('template_file')) {
+            // Delete previous file if exists
+            if ($setting->acceptance_template_path && Storage::exists('public/' . $setting->acceptance_template_path)) {
+                Storage::delete('public/' . $setting->acceptance_template_path);
+            }
+
+            $file = $request->file('template_file');
+            $originalName = $file->getClientOriginalName();
+            $path = $file->store('public/templates');
+
+            $setting->acceptance_template_path = str_replace('public/', '', $path);
+            $setting->template_filename = $originalName;
+            $setting->save();
+
+            FacadesAlert::toast('Template surat kelulusan berhasil diunggah.', 'success');
+            return redirect()->route('admin.status')->with('success', 'Template surat kelulusan berhasil diunggah.');
+        }
+
+        return redirect()->route('admin.status')->with('error', 'Gagal mengunggah template file.');
+    }
+
+    public function downloadAdminAcceptanceTemplate()
+    {
+        $setting = AnnouncementSetting::current();
+        if (!$setting->acceptance_template_path || !Storage::exists('public/' . $setting->acceptance_template_path)) {
+            FacadesAlert::toast('Belum ada file template yang diunggah.', 'error');
+            return redirect()->back()->with('error', 'Belum ada file template yang diunggah.');
+        }
+
+        $filePath = Storage::path('public/' . $setting->acceptance_template_path);
+        return response()->download($filePath, $setting->template_filename ?? 'Template_Kelulusan.' . pathinfo($filePath, PATHINFO_EXTENSION));
+    }
+
+    // Controller for Accepted Applicants Monitoring (Peserta Lolos)
+    public function acceptedApplicants(Request $request)
+    {
+        $year = $request->input('year', Carbon::now()->year);
+        $perPage = $request->input('perPage', 10);
+        $search = $request->input('search');
+        $department = $request->input('department');
+        $uploadStatus = $request->input('upload_status'); // 'all', 'uploaded', 'pending'
+
+        // Base query for accepted applicants (status_id = 5)
+        $baseQuery = Apply::with(['document', 'user', 'status'])
+            ->where('status_id', 5);
+
+        if ($year && $year !== 'all') {
+            $baseQuery->whereYear('created_at', $year);
+        }
+
+        // Summary counts for the KPI cards
+        $totalAccepted = (clone $baseQuery)->count();
+        $totalUploaded = (clone $baseQuery)->whereHas('document', function ($q) {
+            $q->whereNotNull('signed_acceptance_letter')
+              ->where('signed_acceptance_letter', '!=', '');
+        })->count();
+        $totalPending = $totalAccepted - $totalUploaded;
+
+        // Query with active filters for the table
+        $query = clone $baseQuery;
+
+        if ($department && $department !== 'All' && $department !== '') {
+            $query->whereHas('document', function ($q) use ($department) {
+                $q->where('department', $department);
+            });
+        }
+
+        if ($uploadStatus === 'uploaded') {
+            $query->whereHas('document', function ($q) {
+                $q->whereNotNull('signed_acceptance_letter')
+                  ->where('signed_acceptance_letter', '!=', '');
+            });
+        } elseif ($uploadStatus === 'pending') {
+            $query->whereHas('document', function ($q) {
+                $q->whereNull('signed_acceptance_letter')
+                  ->orWhere('signed_acceptance_letter', '=', '');
+            });
+        }
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('no_register', 'like', "%{$search}%")
+                  ->orWhereHas('document', function ($docQuery) use ($search) {
+                      $docQuery->where('first_name', 'like', "%{$search}%")
+                               ->orWhere('family_name', 'like', "%{$search}%")
+                               ->orWhere('email', 'like', "%{$search}%")
+                               ->orWhere('department', 'like', "%{$search}%")
+                               ->orWhere('nationality', 'like', "%{$search}%");
+                  });
+            });
+        }
+
+        $applicants = $query->latest()->paginate($perPage)->appends($request->query());
+        $announcementSetting = AnnouncementSetting::current();
+
+        return view('admin.accepted', [
+            'applicants' => $applicants,
+            'year' => $year,
+            'departments' => $this->departments,
+            'totalAccepted' => $totalAccepted,
+            'totalUploaded' => $totalUploaded,
+            'totalPending' => $totalPending,
+            'selectedDepartment' => $department,
+            'selectedUploadStatus' => $uploadStatus,
+            'announcementSetting' => $announcementSetting,
+        ]);
+    }
+
+    public function exportAcceptedApplicants(Request $request)
+    {
+        $department = $request->input('department');
+        $uploadStatus = $request->input('upload_status');
+        $year = $request->input('year', Carbon::now()->year);
+
+        $filename = 'accepted_applicants_' . ($department ? str_replace(' ', '_', $department) : 'all') . '_' . ($uploadStatus ? $uploadStatus : 'all') . '.xlsx';
+        return Excel::download(new AcceptedApplyExport($department, $uploadStatus, $year), $filename);
     }
 
     // Controller for manage blog

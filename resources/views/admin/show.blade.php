@@ -168,14 +168,15 @@
                                                 'first_letter_of_recommendation' => 'First Letter of Recommendation',
                                                 'second_letter_of_recommendation' => 'Second Letter of Recommendation',
                                                 'commitment_letter' => 'Commitment Letter',
+                                                'signed_acceptance_letter' => 'Signed Acceptance Letter',
                                             ];
                                         @endphp
                                         @if (!empty($apply_data->document))
                                             @foreach ($documents as $key => $label)
                                                 @if (!empty($apply_data->document->$key))
                                                     <div
-                                                        class="md:col-span-2 flex items-center bg-white p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
-                                                        <svg class="w-3.5 h-3.5 me-2 text-green-500 dark:text-green-400 flex-shrink-0"
+                                                        class="md:col-span-2 flex items-center {{ $key === 'signed_acceptance_letter' ? 'bg-emerald-50 border border-emerald-300' : 'bg-white' }} p-4 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200">
+                                                        <svg class="w-4 h-4 me-2 {{ $key === 'signed_acceptance_letter' ? 'text-emerald-600' : 'text-green-500' }} flex-shrink-0"
                                                             aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                                                             fill="currentColor" viewBox="0 0 20 20">
                                                             <path
@@ -183,9 +184,16 @@
                                                         </svg>
                                                         <a href="#"
                                                             @click.prevent="openModal('{{ asset('storage/' . $apply_data->document->$key) }}')"
-                                                            class="text-base text-blue-500 hover:underline">
+                                                            class="text-base {{ $key === 'signed_acceptance_letter' ? 'text-emerald-700 font-semibold' : 'text-blue-500' }} hover:underline">
                                                             {{ $label }}
                                                         </a>
+                                                    </div>
+                                                @elseif($key === 'signed_acceptance_letter' && $apply_data->status_id == 5)
+                                                    <div class="md:col-span-2 flex items-center bg-amber-50 border border-amber-200 p-4 rounded-lg shadow-sm">
+                                                        <svg class="w-4 h-4 me-2 text-amber-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                        </svg>
+                                                        <span class="text-sm text-amber-700">Signed Acceptance Letter (Belum Diunggah Peserta)</span>
                                                     </div>
                                                 @endif
                                             @endforeach

@@ -57,6 +57,15 @@ Route::middleware(['auth:admin', 'admin'])->group(function () {
     Route::get('/table/user-status', [AdminController::class, 'status'])->name('admin.status');
     Route::post('/table/user/{id}/update-status', [AdminController::class, 'updateStatus'])->name('admin.updateStatus');
     Route::patch('/table/user/comment', [AdminController::class, 'updateComment'])->name('admin.updateComment');
+
+    // Accepted Applicants (Peserta Lolos)
+    Route::get('/table/accepted', [AdminController::class, 'acceptedApplicants'])->name('admin.acceptedApplicants');
+    Route::get('/table/export-accepted-data', [AdminController::class, 'exportAcceptedApplicants'])->name('admin.exportAcceptedApplicants');
+
+    // Announcement & Acceptance Template Settings
+    Route::post('/table/announcement-setting/toggle', [AdminController::class, 'toggleAnnouncementPublish'])->name('admin.toggleAnnouncementPublish');
+    Route::post('/table/announcement-setting/upload-template', [AdminController::class, 'uploadAcceptanceTemplate'])->name('admin.uploadAcceptanceTemplate');
+    Route::get('/table/announcement-setting/download-template', [AdminController::class, 'downloadAdminAcceptanceTemplate'])->name('admin.downloadAdminAcceptanceTemplate');
     Route::prefix('admin')->group(function () {
         // Blog
         Route::get('/blog', [AdminController::class, 'blog'])->name('admin.blog');
@@ -93,4 +102,8 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/profile', [UserController::class, 'showProfile'])->name('user.profile');
     Route::get('/profile/edit', [UserController::class, 'showUpdateProfileForm'])->name('user.updateProfile');
     Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
+
+    // Announcement Acceptance Letter Download & Upload
+    Route::get('/download-acceptance-template', [UserController::class, 'downloadAcceptanceTemplate'])->name('user.downloadAcceptanceTemplate');
+    Route::post('/upload-signed-acceptance', [UserController::class, 'uploadSignedAcceptance'])->name('user.uploadSignedAcceptance');
 });

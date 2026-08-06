@@ -14,39 +14,59 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 
-class ApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
+class AcceptedApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, ShouldAutoSize
 {
     protected $year;
     protected $department;
+    protected $uploadStatus;
     protected $rowNumber = 1;
 
-    public function __construct($department = null)
+    public function __construct($department = null, $uploadStatus = null, $year = null)
     {
-        $this->year = Carbon::now()->year;
+        $this->year = $year ?? Carbon::now()->year;
         $this->department = $department;
+        $this->uploadStatus = $uploadStatus;
     }
 
     public function query()
     {
-        $query = Apply::with('status', 'document')->whereYear('created_at', $this->year);
-        
+        $query = Apply::with('status', 'document')
+            ->where('status_id', 5)
+            ->whereYear('created_at', $this->year);
+
         if ($this->department && $this->department !== 'All' && $this->department !== '') {
-            $query->whereHas('document', function($q) {
+            $query->whereHas('document', function ($q) {
                 $q->where('department', $this->department);
             });
         }
-        
-        return $query;
+
+        if ($this->uploadStatus === 'uploaded') {
+            $query->whereHas('document', function ($q) {
+                $q->whereNotNull('signed_acceptance_letter')
+                  ->where('signed_acceptance_letter', '!=', '');
+            });
+        } elseif ($this->uploadStatus === 'pending') {
+            $query->whereHas('document', function ($q) {
+                $q->whereNull('signed_acceptance_letter')
+                  ->orWhere('signed_acceptance_letter', '=', '');
+            });
+        }
+
+        return $query->latest();
     }
 
     public function headings(): array
     {
         return [
             'No',
-            'Nama',
+            'No Register',
+            'Nama Lengkap',
             'Email',
+            'Phone Number',
             'Department',
             'Nationality',
+            'Status Upload Signed Letter',
+            'Link Signed Acceptance Letter',
             'Link Passport',
             'Link Study Plan',
             'Link English Proficiency',
@@ -56,18 +76,23 @@ class ApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
             'Link First Letter of Recommendation',
             'Link Second Letter of Recommendation',
             'Link Commitment Letter',
-            'Link Signed Acceptance Letter',
         ];
     }
 
     public function map($apply): array
     {
+        $hasSigned = !empty($apply->document->signed_acceptance_letter);
+
         return [
             $this->rowNumber++,
+            $apply->no_register ?? '-',
             $apply->document->first_name . ' ' . $apply->document->family_name,
             $apply->document->email,
+            $apply->document->phone_number ?? '-',
             $apply->document->department,
             $apply->document->nationality,
+            $hasSigned ? 'Sudah Upload' : 'Belum Upload (Pending)',
+            $hasSigned ? asset('storage/' . $apply->document->signed_acceptance_letter) : 'Belum Ada',
             $apply->document->passport ? asset('storage/' . $apply->document->passport) : '',
             $apply->document->study_plan ? asset('storage/' . $apply->document->study_plan) : '',
             $apply->document->english_proficiency ? asset('storage/' . $apply->document->english_proficiency) : '',
@@ -77,7 +102,6 @@ class ApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
             $apply->document->first_letter_of_recommendation ? asset('storage/' . $apply->document->first_letter_of_recommendation) : '',
             $apply->document->second_letter_of_recommendation ? asset('storage/' . $apply->document->second_letter_of_recommendation) : '',
             $apply->document->commitment_letter ? asset('storage/' . $apply->document->commitment_letter) : '',
-            $apply->document->signed_acceptance_letter ? asset('storage/' . $apply->document->signed_acceptance_letter) : '',
         ];
     }
 
@@ -86,7 +110,7 @@ class ApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
         $highestRow = $sheet->getHighestRow();
         $highestColumn = $sheet->getHighestColumn();
 
-        // Style for header
+        // Header style
         $sheet->getStyle('A1:' . $highestColumn . '1')->applyFromArray([
             'font' => [
                 'bold' => true,
@@ -94,7 +118,7 @@ class ApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
             ],
             'fill' => [
                 'fillType' => Fill::FILL_SOLID,
-                'startColor' => ['rgb' => '114D91'],
+                'startColor' => ['rgb' => '065F46'], // Emerald Dark Green
             ],
             'alignment' => [
                 'horizontal' => Alignment::HORIZONTAL_CENTER,
@@ -102,21 +126,21 @@ class ApplyExport implements FromQuery, WithHeadings, WithMapping, WithStyles, S
             ],
         ]);
 
-        // Border for all cells
+        // Border styling for all cells
         $sheet->getStyle('A1:' . $highestColumn . $highestRow)->applyFromArray([
             'borders' => [
                 'allBorders' => [
                     'borderStyle' => Border::BORDER_THIN,
-                    'color' => ['argb' => '00000000'],
+                    'color' => ['rgb' => 'D1D5DB'],
                 ],
             ],
         ]);
 
-        // Text Alignment for No, Department, Nationality
+        // Alignment for data rows
         $sheet->getStyle('A2:A' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('D2:D' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        $sheet->getStyle('E2:E' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-        
+        $sheet->getStyle('B2:B' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('G2:H' . $highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+
         return [];
     }
 }
