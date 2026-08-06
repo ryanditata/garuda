@@ -49,8 +49,8 @@
                         </svg>
                     </div>
                     <div>
-                        <h1 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-snug">Daftar Peserta Lolos (Accepted)</h1>
-                        <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Monitoring peserta lolos dan kelengkapan Signed Acceptance Letter</p>
+                        <h1 class="text-xl sm:text-2xl font-black text-gray-900 tracking-tight leading-snug">Daftar Peserta Lolos</h1>
+                        <p class="text-xs sm:text-sm text-gray-500 mt-0.5">Monitoring peserta lolos dan kelengkapan Statement Letter</p>
                     </div>
                 </div>
                 <div class="flex flex-wrap items-center gap-2.5 sm:gap-3 self-start md:self-auto">
@@ -79,7 +79,7 @@
                 <div>
                     <p class="text-xs font-semibold text-blue-200 uppercase tracking-wider">Total Peserta Lolos</p>
                     <h3 class="text-2xl sm:text-3xl font-black mt-1">{{ $totalAccepted }}</h3>
-                    <p class="text-xs text-blue-200 mt-0.5">Status seleksi Accepted (ID: 5)</p>
+                    <p class="text-xs text-blue-200 mt-0.5">Status seleksi Accepted</p>
                 </div>
                 <div class="p-3 sm:p-3.5 bg-white bg-opacity-10 rounded-2xl flex-shrink-0">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7 sm:h-8 sm:w-8 text-blue-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -225,7 +225,7 @@
                             <th scope="col" class="py-3 px-3 sm:px-4 font-bold min-w-[200px]">Peserta</th>
                             <th scope="col" class="py-3 px-3 sm:px-4 font-bold min-w-[180px]">Kontak</th>
                             <th scope="col" class="py-3 px-3 sm:px-4 font-bold min-w-[180px]">Department</th>
-                            <th scope="col" class="py-3 px-3 sm:px-4 text-center font-bold whitespace-nowrap min-w-[170px]">Signed Acceptance Letter</th>
+                            <th scope="col" class="py-3 px-3 sm:px-4 text-center font-bold whitespace-nowrap min-w-[170px]">Statement Letter</th>
                             <th scope="col" class="py-3 px-3 sm:px-4 text-center font-bold whitespace-nowrap min-w-[100px]">Aksi</th>
                         </tr>
                     </thead>

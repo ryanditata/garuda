@@ -146,6 +146,75 @@
             </div>
         </div>
     </div>
+    {{-- Announcement Popup Modal (If Published) --}}
+    @if (isset($announcementSetting) && $announcementSetting->is_published)
+        <div id="announcement-popup-modal"
+            class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm hidden opacity-0 transition-all duration-300">
+            <div id="announcement-modal-card"
+                class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-gray-100 transform scale-95 transition-all duration-300 relative">
+                
+                {{-- Header with Gradient & Celebration Icon --}}
+                <div class="bg-gradient-to-r from-[#003d7a] via-blue-900 to-indigo-900 px-6 py-5 text-white relative">
+                    <button type="button" id="close-announcement-x"
+                        class="absolute top-4 right-4 text-white/80 hover:text-white bg-white/10 hover:bg-white/20 rounded-full p-1.5 transition">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-yellow-500/20 text-yellow-400 border border-yellow-400/30 rounded-2xl flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="inline-block px-2.5 py-0.5 text-[10px] font-extrabold uppercase tracking-wider bg-yellow-400 text-blue-950 rounded-full font-sans mb-1">
+                                OFFICIAL ANNOUNCEMENT
+                            </span>
+                            <h2 class="text-lg sm:text-xl font-black text-white leading-tight">
+                                Selection Results Announced!
+                            </h2>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Modal Body --}}
+                <div class="p-6 sm:p-7">
+                    <p class="text-sm sm:text-base font-bold text-gray-800 mb-2">
+                        Dear Garuda Scholarship Applicants,
+                    </p>
+                    <p class="text-xs sm:text-sm text-gray-600 leading-relaxed mb-4">
+                        The selection results for the Garuda Scholarship at Universitas Dian Nuswantoro have been officially announced. Please log in to your account to check your admission status (<em>Accepted / Rejected</em>) on the dashboard.
+                    </p>
+
+                    <div class="bg-blue-50 border-l-4 border-blue-600 p-3.5 rounded-r-xl mb-6">
+                        <div class="flex items-start gap-2.5">
+                            <svg class="w-5 h-5 text-blue-700 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <p class="text-xs text-blue-900 font-medium leading-normal">
+                                For applicants who are <strong>Accepted</strong>, please download the <em>Statement Letter Template</em> and re-upload the signed document through your account dashboard.
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Actions --}}
+                    <div class="flex flex-col sm:flex-row items-center gap-2.5">
+                        <button type="button" id="btn-login-cta"
+                            class="w-full sm:flex-1 py-3 px-4 bg-yellow-500 hover:bg-yellow-400 text-gray-950 font-bold text-xs sm:text-sm rounded-xl shadow-md transition flex items-center justify-center gap-2">
+                            <span>Log In & Check Results</span>
+                        </button>
+                        <button type="button" id="close-announcement-btn"
+                            class="w-full sm:w-auto py-3 px-4 bg-gray-100 hover:bg-gray-200 text-gray-700 font-semibold text-xs sm:text-sm rounded-xl transition text-center">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    @endif
+
     {{-- End modal --}}
     <!-- Scripts -->
     <script>
@@ -154,22 +223,79 @@
         const modalContent = document.getElementById('modal-content');
         const closeModal = document.getElementById('close-modal');
 
-        forgotPasswordLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            forgotPasswordModal.classList.remove('hidden');
-            setTimeout(() => {
-                forgotPasswordModal.classList.remove('opacity-0');
-                modalContent.classList.remove('scale-95');
-            }, 10); // slight delay for smooth transition
-        });
+        if (forgotPasswordLink && forgotPasswordModal && modalContent && closeModal) {
+            forgotPasswordLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                forgotPasswordModal.classList.remove('hidden');
+                setTimeout(() => {
+                    forgotPasswordModal.classList.remove('opacity-0');
+                    modalContent.classList.remove('scale-95');
+                }, 10); // slight delay for smooth transition
+            });
 
-        closeModal.addEventListener('click', function() {
-            forgotPasswordModal.classList.add('opacity-0');
-            modalContent.classList.add('scale-95');
+            closeModal.addEventListener('click', function() {
+                forgotPasswordModal.classList.add('opacity-0');
+                modalContent.classList.add('scale-95');
+                setTimeout(() => {
+                    forgotPasswordModal.classList.add('hidden');
+                }, 300); // match the duration of the transition
+            });
+        }
+
+        // Announcement Popup Modal Logic
+        const announcementModal = document.getElementById('announcement-popup-modal');
+        const announcementCard = document.getElementById('announcement-modal-card');
+        const closeAnnouncementX = document.getElementById('close-announcement-x');
+        const closeAnnouncementBtn = document.getElementById('close-announcement-btn');
+        const btnLoginCta = document.getElementById('btn-login-cta');
+
+        function openAnnouncementModal() {
+            if (!announcementModal || !announcementCard) return;
+            announcementModal.classList.remove('hidden');
             setTimeout(() => {
-                forgotPasswordModal.classList.add('hidden');
-            }, 300); // match the duration of the transition
-        });
+                announcementModal.classList.remove('opacity-0');
+                announcementCard.classList.remove('scale-95');
+                announcementCard.classList.add('scale-100');
+            }, 50);
+        }
+
+        function hideAnnouncementModal() {
+            if (!announcementModal || !announcementCard) return;
+            announcementModal.classList.add('opacity-0');
+            announcementCard.classList.remove('scale-100');
+            announcementCard.classList.add('scale-95');
+            setTimeout(() => {
+                announcementModal.classList.add('hidden');
+            }, 300);
+            sessionStorage.setItem('garuda_announcement_seen', 'true');
+        }
+
+        if (announcementModal) {
+            // Auto open modal on page load if not closed in this session
+            window.addEventListener('DOMContentLoaded', () => {
+                if (!sessionStorage.getItem('garuda_announcement_seen')) {
+                    setTimeout(openAnnouncementModal, 300);
+                }
+            });
+
+            if (closeAnnouncementX) closeAnnouncementX.addEventListener('click', hideAnnouncementModal);
+            if (closeAnnouncementBtn) closeAnnouncementBtn.addEventListener('click', hideAnnouncementModal);
+            if (btnLoginCta) {
+                btnLoginCta.addEventListener('click', () => {
+                    hideAnnouncementModal();
+                    const emailInput = document.getElementById('email');
+                    if (emailInput) {
+                        emailInput.focus();
+                    }
+                });
+            }
+
+            announcementModal.addEventListener('click', (e) => {
+                if (e.target === announcementModal) {
+                    hideAnnouncementModal();
+                }
+            });
+        }
 
         document.getElementById('loginForm').addEventListener('submit', function(event) {
             const email = document.getElementById('email').value;
@@ -192,3 +318,4 @@
 </body>
 
 </html>
+

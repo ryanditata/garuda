@@ -275,7 +275,8 @@ class UserController extends Controller
 
     public function showLoginForm()
     {
-        return view('user.login');
+        $announcementSetting = AnnouncementSetting::current();
+        return view('user.login', compact('announcementSetting'));
     }
 
     public function login(Request $request)
@@ -556,12 +557,12 @@ class UserController extends Controller
         }
 
         if (!$setting->acceptance_template_path || !Storage::exists('public/' . $setting->acceptance_template_path)) {
-            Alert::toast('Acceptance letter template is not available yet. Please contact the administrator.', 'warning');
+            Alert::toast('Statement letter template is not available yet. Please contact the administrator.', 'warning');
             return redirect()->route('user.index');
         }
 
         $filePath = Storage::path('public/' . $setting->acceptance_template_path);
-        return response()->download($filePath, $setting->template_filename ?? 'Acceptance_Letter_Template.' . pathinfo($filePath, PATHINFO_EXTENSION));
+        return response()->download($filePath, $setting->template_filename ?? 'Statement_Letter_Template.' . pathinfo($filePath, PATHINFO_EXTENSION));
     }
 
     public function uploadSignedAcceptance(Request $request)
@@ -597,12 +598,12 @@ class UserController extends Controller
 
             DB::commit();
 
-            Alert::toast('Signed acceptance letter uploaded successfully.', 'success');
+            Alert::toast('Statement letter uploaded successfully.', 'success');
             return redirect()->route('user.index');
         } catch (\Throwable $th) {
             DB::rollBack();
-            Log::error('Error uploading signed acceptance letter: ' . $th->getMessage());
-            Alert::toast('Failed to upload signed acceptance letter.', 'error');
+            Log::error('Error uploading statement letter: ' . $th->getMessage());
+            Alert::toast('Failed to upload statement letter.', 'error');
             return redirect()->route('user.index');
         }
     }

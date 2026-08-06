@@ -53,7 +53,7 @@ class ApplywithFilterExport implements FromQuery, WithHeadings, WithMapping, Wit
             'Link First Letter of Recommendation',
             'Link Second Letter of Recommendation',
             'Link Commitment Letter',
-            'Link Signed Acceptance Letter',
+            'Link Statement Letter',
         ];
     }
 

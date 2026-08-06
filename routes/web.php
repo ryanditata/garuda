@@ -103,7 +103,7 @@ Route::middleware(['auth:web'])->group(function () {
     Route::get('/profile/edit', [UserController::class, 'showUpdateProfileForm'])->name('user.updateProfile');
     Route::put('/profile/update', [UserController::class, 'updateProfile'])->name('user.updateProfile');
 
-    // Announcement Acceptance Letter Download & Upload
-    Route::get('/download-acceptance-template', [UserController::class, 'downloadAcceptanceTemplate'])->name('user.downloadAcceptanceTemplate');
+    // Announcement Statement Letter Download & Upload
+    Route::get('/announcement/download-template', [UserController::class, 'downloadAcceptanceTemplate'])->name('user.downloadAcceptanceTemplate');
     Route::post('/upload-signed-acceptance', [UserController::class, 'uploadSignedAcceptance'])->name('user.uploadSignedAcceptance');
 });

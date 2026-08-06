@@ -135,7 +135,7 @@
                                                     'second_letter_of_recommendation' =>
                                                         'Second Letter of Recommendation',
                                                     'commitment_letter' => 'Commitment Letter',
-                                                    'signed_acceptance_letter' => 'Signed Acceptance Letter',
+                                                    'signed_acceptance_letter' => 'Statement Letter',
                                                 ];
                                             @endphp
                                             @if (!empty($apply_data->document))

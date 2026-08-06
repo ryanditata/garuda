@@ -17,3 +17,13 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::get('/announcement-status', function () {
+    $setting = \App\Models\AnnouncementSetting::current();
+    return response()->json([
+        'is_published' => (bool) $setting->is_published,
+        'published_at' => $setting->published_at,
+        'login_url' => url('/login'),
+    ]);
+});
+
